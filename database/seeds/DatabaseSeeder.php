@@ -12,6 +12,9 @@ class DatabaseSeeder extends Seeder
     public function run()
     {
         // $this->call(UsersTableSeeder::class);
+        if (DB::table('oauth_clients')->count() < 1) {
+            Artisan::call('passport:install');
+        }
         $this->call(DemoSeeder::class);
     }
 }

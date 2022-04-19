@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Transformers;
 
 use App\Organisation;
+use Illuminate\Support\Carbon;
+use App\Transformers\UserTransformer;
 use League\Fractal\TransformerAbstract;
 
 /**
@@ -20,7 +22,15 @@ class OrganisationTransformer extends TransformerAbstract
      */
     public function transform(Organisation $organisation): array
     {
-        return [];
+        $owner = $this->includeUser($organisation);
+
+        return [
+            'id' => (int) $organisation->id,
+            'name' => (string) $organisation->name,
+            'trial_end' => $organisation->trial_end ? (int) Carbon::parse($organisation->trial_end)->timestamp : null,
+            'subscribed' => (bool) $organisation->subscribed,
+            'owner' => $owner
+        ];
     }
 
     /**
@@ -30,6 +40,8 @@ class OrganisationTransformer extends TransformerAbstract
      */
     public function includeUser(Organisation $organisation)
     {
-        return $this->item($organisation->user, new UserTransformer());
+        $userTransformer = new UserTransformer();
+        
+        return $userTransformer->transform($organisation->owner);
     }
 }
